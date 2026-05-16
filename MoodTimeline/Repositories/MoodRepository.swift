@@ -8,6 +8,9 @@ protocol MoodRepositoryProtocol {
     func getEntries(after date: Date?, limit: Int) -> [MoodEntryDTO]
     func getAllTags() -> [TagDTO]
     func createTag(_ dto: TagDTO) throws
+    
+    // 统计分析方法
+    func getAllEntries() -> [MoodEntryDTO]
 }
 
 class MoodRepository: MoodRepositoryProtocol {
@@ -49,4 +52,12 @@ class MoodRepository: MoodRepositoryProtocol {
 enum RepositoryError: Error {
     case notFound
     case saveFailed
+}
+
+// 工厂方法：根据条件返回不同的 Repository 实现
+func makeRepository(useCoreData: Bool = false, context: NSManagedObjectContext? = nil) -> MoodRepositoryProtocol {
+    if useCoreData, let context = context {
+        return MoodRepository(context: context)
+    }
+    return InMemoryRepository()
 }
