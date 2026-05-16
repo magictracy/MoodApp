@@ -48,18 +48,18 @@ git remote -v
 - 密码：您的 Gitee 登录密码
 
 ### GitHub 认证
-推荐使用以下方式之一：
-1. **Personal Access Token (PAT)**
-   - 在 GitHub Settings → Developer settings → Personal access tokens 生成
-   - 使用 token 代替密码进行认证
+**已配置 Personal Access Token (PAT)**
+- Token 已嵌入到远程仓库 URL 中
+- 无需每次输入密码，可直接推送
 
-2. **SSH 密钥**
+其他认证方式（备选）：
+1. **SSH 密钥**
    ```bash
    # 切换为 SSH 方式
    git remote set-url origin git@github.com:magictracy/MoodApp.git
    ```
 
-3. **GitHub CLI**
+2. **GitHub CLI**
    ```bash
    gh auth login
    ```
