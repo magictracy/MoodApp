@@ -3,6 +3,8 @@ import SwiftUI
 struct TrendListView: View {
     let trendData: [(date: Date, moodLevel: Int)]
     
+    private let maxTrendItems = 10
+    
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
         formatter.dateFormat = "MM/dd"
@@ -20,7 +22,8 @@ struct TrendListView: View {
                     .foregroundColor(.secondary)
                     .padding()
             } else {
-                ForEach(trendData.prefix(10), id: \.date) { item in
+                // 显示最近10条记录（已按时间降序排列）
+                ForEach(trendData.prefix(maxTrendItems), id: \.date) { item in
                     HStack {
                         Text(dateFormatter.string(from: item.date))
                             .font(.subheadline)
@@ -46,9 +49,14 @@ struct TrendListView: View {
     }
     
     private func moodEmoji(for level: Int) -> String {
-        let emojis = ["😢", "😟", "😐", "🙂", "😊"]
-        let index = max(0, min(level - 1, emojis.count - 1))
-        return emojis[index]
+        switch level {
+        case 1: return "😢"
+        case 2: return "😟"
+        case 3: return "😐"
+        case 4: return "🙂"
+        case 5...10: return "😊"
+        default: return "❓"
+        }
     }
 }
 

@@ -52,7 +52,9 @@ struct AnalyticsView: View {
             HStack(spacing: 12) {
                 ForEach(AnalyticsPeriod.allCases) { period in
                     Button(action: {
-                        viewModel.changePeriod(period)
+                        withAnimation(.easeInOut) {
+                            viewModel.changePeriod(period)
+                        }
                     }) {
                         Text(period.title)
                             .font(.subheadline)
@@ -129,7 +131,7 @@ struct AnalyticsView: View {
             Text("暂无统计数据")
                 .font(.headline)
             
-            Text("开始记录心情后即可查看分析")
+            Text("记录第一条心情后，这里将展示您的情绪分析")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }

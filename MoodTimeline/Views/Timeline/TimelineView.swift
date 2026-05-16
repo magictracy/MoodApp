@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TimelineView: View {
     @State private var entries: [MoodEntryDTO] = []
+    @State private var isLoading = false
     
     var body: some View {
         NavigationView {
@@ -15,8 +16,13 @@ struct TimelineView: View {
             .navigationTitle("📅 心情时间线")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink(destination: RecordView()) {
-                        Image(systemName: "plus")
+                    HStack {
+                        Button(action: { loadEntries() }) {
+                            Image(systemName: "arrow.clockwise")
+                        }
+                        NavigationLink(destination: RecordView()) {
+                            Image(systemName: "plus")
+                        }
                     }
                 }
             }
@@ -27,8 +33,11 @@ struct TimelineView: View {
     }
     
     private func loadEntries() {
-        // TODO: Load from service
-        entries = MoodEntryDTO.sampleEntries
+        Task {
+            isLoading = true
+            entries = await DataManager.shared.moodService.getEntries(after: nil, limit: 100)
+            isLoading = false
+        }
     }
 }
 
@@ -40,7 +49,12 @@ struct TimelineListView: View {
             ForEach(groupEntriesByDate(entries), id: \.date) { group in
                 Section(header: Text(formatDate(group.date))) {
                     ForEach(group.entries, id: \.id) { entry in
-                        MoodEntryRow(entry: entry)
+                        MoodEntryRow(entry: entry) {
+                            Task {
+                                try? await DataManager.shared.moodService.deleteEntry(id: entry.id)
+                                loadEntries()  // 重新加载
+                            }
+                        }
                     }
                 }
             }
@@ -67,6 +81,7 @@ struct TimelineListView: View {
 
 struct MoodEntryRow: View {
     let entry: MoodEntryDTO
+    let onDelete: () -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -99,6 +114,13 @@ struct MoodEntryRow: View {
             }
         }
         .padding(.vertical, 4)
+        .swipeActions(edge: .trailing) {
+            Button(role: .destructive) {
+                onDelete()
+            } label: {
+                Label("删除", systemImage: "trash")
+            }
+        }
     }
     
     private func formatTime(_ date: Date) -> String {
@@ -121,6 +143,18 @@ struct EmptyStateView: View {
             Text("点击右下角 + 开始记录吧")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
+            
+            // 添加示例数据按钮
+            Button(action: {
+                // 示例数据已经在 InMemoryRepository 初始化时加载
+            }) {
+                Text("查看示例数据")
+                    .font(.body)
+                    .padding()
+                    .background(Color.blue.opacity(0.1))
+                    .cornerRadius(8)
+            }
+            .padding(.top, 8)
         }
     }
 }

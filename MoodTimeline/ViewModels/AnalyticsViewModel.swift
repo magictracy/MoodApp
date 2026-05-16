@@ -20,18 +20,11 @@ class AnalyticsViewModel: ObservableObject {
         errorMessage = nil
         
         Task {
-            do {
-                let newStats = await analyticsService.calculateStats(for: selectedPeriod)
-                
-                await MainActor.run {
-                    self.stats = newStats
-                    self.isLoading = false
-                }
-            } catch {
-                await MainActor.run {
-                    self.errorMessage = "加载统计数据失败"
-                    self.isLoading = false
-                }
+            let newStats = await analyticsService.calculateStats(for: selectedPeriod)
+            
+            await MainActor.run {
+                self.stats = newStats
+                self.isLoading = false
             }
         }
     }

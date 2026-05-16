@@ -78,19 +78,34 @@ struct RecordView: View {
                     }
                 }
             }
-            .navigationTitle("✏️ 记录心情")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("取消") {
-                        dismiss()
-                    }
+            
+            // 错误提示
+            if let error = viewModel.saveError {
+                Section {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .font(.caption)
                 }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
+            }
+        }
+        .navigationTitle("✏️ 记录心情")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button("取消") {
+                    dismiss()
+                }
+            }
+            
+            ToolbarItem(placement: .navigationBarTrailing) {
+                if viewModel.isSaving {
+                    ProgressView()
+                } else {
                     Button("保存") {
                         Task {
                             await viewModel.saveEntry()
-                            dismiss()
+                            if viewModel.saveError == nil {
+                                dismiss()
+                            }
                         }
                     }
                     .disabled(!viewModel.isValid)

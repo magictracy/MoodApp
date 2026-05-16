@@ -11,13 +11,14 @@ class RecordViewModel: ObservableObject {
     @Published var exerciseMinutes: Int = 0
     @Published var energyLevel: Int = 5
     @Published var photoData: Data?
+    @Published var isSaving = false
+    @Published var saveError: String?
     
     private let service: MoodRecordServiceProtocol
     
-    init(service: MoodRecordServiceProtocol = MoodRecordService(
-        repository: MoodRepository(context: NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType))
-    )) {
-        self.service = service
+    init(service: MoodRecordServiceProtocol? = nil) {
+        // 使用 DataManager 的共享服务作为默认实现
+        self.service = service ?? DataManager.shared.moodService
     }
     
     var isValid: Bool {
@@ -25,6 +26,9 @@ class RecordViewModel: ObservableObject {
     }
     
     func saveEntry() async {
+        isSaving = true
+        saveError = nil
+        
         let dto = MoodEntryDTO(
             moodEmoji: moodEmoji,
             moodLevel: mapEmojiToLevel(moodEmoji),
@@ -41,8 +45,11 @@ class RecordViewModel: ObservableObject {
             try await service.createEntry(dto)
             print("✅ Entry saved successfully")
         } catch {
+            saveError = error.localizedDescription
             print("❌ Save error: \(error)")
         }
+        
+        isSaving = false
     }
     
     private func mapEmojiToLevel(_ emoji: String) -> Int {

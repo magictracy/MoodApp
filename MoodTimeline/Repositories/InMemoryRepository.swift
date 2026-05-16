@@ -129,16 +129,27 @@ class InMemoryRepository: MoodRepositoryProtocol {
             let sortedEntries = Array(entries.values).sorted { $0.timestamp > $1.timestamp }
             let calendar = Calendar.current
             
-            var continuousDays = 1
-            var currentDate = calendar.startOfDay(for: sortedEntries[0].timestamp)
+            // 去重：提取唯一的日期（按天）
+            var uniqueDays: [Date] = []
+            for entry in sortedEntries {
+                let day = calendar.startOfDay(for: entry.timestamp)
+                if uniqueDays.isEmpty || uniqueDays.last != day {
+                    uniqueDays.append(day)
+                }
+            }
             
-            for i in 1..<sortedEntries.count {
-                let entryDate = calendar.startOfDay(for: sortedEntries[i].timestamp)
-                let dayDiff = calendar.dateComponents([.day], from: entryDate, to: currentDate).day ?? 0
+            // 计算连续天数
+            guard !uniqueDays.isEmpty else { return 0 }
+            
+            var continuousDays = 1
+            var currentDate = uniqueDays[0]
+            
+            for i in 1..<uniqueDays.count {
+                let dayDiff = calendar.dateComponents([.day], from: uniqueDays[i], to: currentDate).day ?? 0
                 
                 if dayDiff == 1 {
                     continuousDays += 1
-                    currentDate = entryDate
+                    currentDate = uniqueDays[i]
                 } else if dayDiff > 1 {
                     break
                 }

@@ -20,9 +20,11 @@ MoodTimeline/
 │       ├── MoodEntryDTO.swift
 │       └── TagDTO.swift
 ├── Services/            # 业务逻辑层
-│   └── MoodRecordService.swift
+│   ├── MoodRecordService.swift
+│   └── DataManager.swift        # 全局数据管理器（单例）
 ├── Repositories/        # 数据访问层
-│   └── MoodRepository.swift
+│   ├── MoodRepository.swift      # CoreData 实现（待完成）
+│   └── InMemoryRepository.swift  # 内存版实现（当前使用）
 ├── Views/               # UI 视图
 │   ├── MainTabView.swift
 │   ├── Timeline/       # 时间线页面
@@ -40,14 +42,17 @@ MoodTimeline/
 ### Phase 1: 已完成 ✅
 - [x] 项目结构搭建
 - [x] DTO 数据模型定义
-- [x] Repository 数据访问层
+- [x] Repository 数据访问层（Protocol + InMemory 实现）
 - [x] Service 服务层
 - [x] 基础 UI 框架
+- [x] DataManager 全局数据管理
+- [x] 完整的心情记录功能（创建、查看、删除）
+- [x] 时间线展示（按日期分组）
+- [x] 用户反馈优化（加载状态、错误提示）
 
 ### Phase 2: 进行中 🚧
 - [ ] CoreData 实体配置 (需要 Xcode)
-- [ ] 完整的时间线展示
-- [ ] 完整的记录表单
+- [ ] 切换到 CoreData 持久化存储
 
 ### Phase 3: 待开发 📋
 - [ ] 统计分析功能
@@ -65,7 +70,21 @@ MoodTimeline/
 
 ## 重要说明
 
-⚠️ **Xcode 项目文件需要手动创建**
+### 💡 当前状态：内存版数据存储
+
+✅ **应用已可完整运行**，无需等待 Xcode 安装！
+
+当前使用 `InMemoryRepository` 实现，所有数据存储在内存中：
+- 可以创建、查看、删除心情记录
+- 时间线正确显示所有记录（按日期分组）
+- 数据在整个应用中同步（通过 `DataManager.shared`）
+- ⚠️ 应用重启后数据会丢失（这是预期行为）
+
+### 🔄 切换到 CoreData
+
+当 Xcode 安装完成后，只需修改 `DataManager.swift` 中的一行代码即可切换到 CoreData 持久化存储，其他所有代码无需修改。这就是 Protocol 抽象层的价值所在。
+
+### ⚠️ Xcode 项目文件需要手动创建
 
 由于 `.xcodeproj` 和 `.xcdatamodeld` 文件需要通过 Xcode GUI 创建,请按照以下步骤操作:
 
