@@ -6,27 +6,32 @@ class AnalyticsViewModel: ObservableObject {
     @Published var stats: AnalyticsStats?
     @Published var selectedPeriod: AnalyticsPeriod = .week
     @Published var isLoading = false
-    @Published var errorMessage: String?
     
     private let analyticsService: AnalyticsService
     private var cancellables = Set<AnyCancellable>()
+    private var currentTask: Task<Void, Never>?
     
     init(analyticsService: AnalyticsService) {
         self.analyticsService = analyticsService
     }
     
     func loadStats() {
-        isLoading = true
-        errorMessage = nil
+        // 取消之前的任务，避免竞态条件
+        currentTask?.cancel()
         
-        Task {
+        isLoading = true
+        
+        let task = Task { @MainActor in
             let newStats = await analyticsService.calculateStats(for: selectedPeriod)
             
-            await MainActor.run {
+            // 检查任务是否被取消
+            if !Task.isCancelled {
                 self.stats = newStats
                 self.isLoading = false
             }
         }
+        
+        currentTask = task
     }
     
     func changePeriod(_ period: AnalyticsPeriod) {

@@ -23,10 +23,6 @@ struct AnalyticsView: View {
                     if viewModel.isLoading {
                         ProgressView("加载中...")
                             .padding()
-                    } else if let error = viewModel.errorMessage {
-                        Text(error)
-                            .foregroundColor(.red)
-                            .padding()
                     } else if let stats = viewModel.stats {
                         // 统计卡片网格
                         statsGrid(stats: stats)
@@ -86,7 +82,7 @@ struct AnalyticsView: View {
         ], spacing: 16) {
             StatCardView(
                 title: "平均心情",
-                value: stats.averageMood != nil ? String(format: "%.1f", stats.averageMood!) : "--",
+                value: stats.averageMood != nil ? String(format: "%.1f", stats.averageMood!) : "暂无数据",
                 icon: "heart.fill",
                 color: .red
             )
@@ -107,7 +103,7 @@ struct AnalyticsView: View {
             
             StatCardView(
                 title: "最常用",
-                value: mostUsedEmoji(stats: stats),
+                value: mostUsedEmoji(stats: stats).isEmpty ? "暂无数据" : mostUsedEmoji(stats: stats),
                 icon: "star.fill",
                 color: .yellow
             )
